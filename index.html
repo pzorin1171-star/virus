@@ -3,14 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viral Manager 2D</title>
+    <title>Viral Manager 2D - Управляй вирусом!</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Дополнительные стили для новых элементов */
+        .capture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .mutation-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(25, 25, 50, 0.98);
+            border: 3px solid #6cff6c;
+            border-radius: 15px;
+            padding: 25px;
+            width: 80%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 0 30px rgba(108, 255, 108, 0.5);
+        }
+        
+        .mutation-header {
+            color: #6cff6c;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .mutation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .mutation-item {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(108, 255, 108, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .mutation-item:hover {
+            border-color: #6cff6c;
+            transform: translateY(-3px);
+        }
+        
+        .mutation-item h4 {
+            color: #e0e0ff;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+        
+        .mutation-item p {
+            color: #a0a0ff;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        
+        .mutate-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #6cff6c, #4cd964);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mutate-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #7fff7f, #5de975);
+            transform: translateY(-2px);
+        }
+        
+        .mutate-btn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        .close-menu {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #6cff6c;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .controls-info {
+            background: rgba(40, 40, 80, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #4a4aff;
+        }
+        
+        .controls-info h4 {
+            color: #6cff6c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .key {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 10px;
+            border-radius: 5px;
+            border: 1px solid #4a4aff;
+            font-family: monospace;
+            color: #6cff6c;
+        }
+        
+        .health-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .health-bar-container {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ff3838);
+            border-radius: 5px;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        #gameCanvas {
+            cursor: crosshair;
+        }
+        
+        .difficulty-badge {
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .stat-card {
+            background: rgba(40, 40, 80, 0.6);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(74, 74, 255, 0.3);
+        }
+        
+        .stat-card .label {
+            color: #a0a0ff;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .value {
+            color: #6cff6c;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .mutation-menu {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-virus"></i> Viral Manager 2D</h1>
+            <h1><i class="fas fa-virus"></i> Viral Manager 2D - Управление WASD</h1>
             <div class="resources">
                 <div class="resource">
                     <i class="fas fa-dna"></i>
@@ -24,6 +249,16 @@
                     <i class="fas fa-viruses"></i>
                     <span id="particles">10</span> Частиц
                 </div>
+                <!-- НОВЫЙ РЕСУРС: Очки мутаций -->
+                <div class="resource">
+                    <i class="fas fa-dna" style="color: #6cff6c;"></i>
+                    <span id="mutationPoints">0</span> Мутаций
+                </div>
+                <!-- БЕЙДЖ СЛОЖНОСТИ -->
+                <div class="resource">
+                    <i class="fas fa-skull"></i>
+                    Уровень: <span id="difficulty">1</span>
+                </div>
             </div>
         </header>
 
@@ -31,22 +266,74 @@
             <div class="game-area">
                 <div class="canvas-container">
                     <canvas id="gameCanvas" width="800" height="500"></canvas>
+                    
+                    <!-- ОВЕРЛЕЙ МИНИ-ИГРЫ ЗАХВАТА -->
+                    <div id="captureOverlay" class="capture-overlay">
+                        <div style="background: rgba(0, 0, 0, 0.9); padding: 30px; border-radius: 15px; text-align: center; border: 3px solid #ff4757; max-width: 400px;">
+                            <h2 style="color: #ffcc00; margin-bottom: 15px;"><i class="fas fa-crosshairs"></i> ЗАХВАТ КЛЕТКИ</h2>
+                            <p style="color: #e0e0ff; margin-bottom: 20px;">Кликайте быстро на клетку для захвата!</p>
+                            
+                            <div style="margin: 25px 0;">
+                                <div style="background: #333; height: 25px; border-radius: 12px; overflow: hidden; margin-bottom: 10px;">
+                                    <div id="captureProgressBar" style="height: 100%; background: linear-gradient(90deg, #ff4757, #ff3838); width: 0%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <div style="color: #a0a0ff; font-size: 0.9em;">
+                                    Прогресс: <span id="captureProgressText">0%</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+                                <div style="text-align: left;">
+                                    <div style="color: #6cff6c; font-weight: bold;">Кликов:</div>
+                                    <div style="font-size: 1.5em;"><span id="captureClicks">0</span>/10</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: #ffa726; font-weight: bold;">Осталось:</div>
+                                    <div style="font-size: 1.5em;"><span id="captureTimer">5.0</span>с</div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 71, 87, 0.1); border-radius: 10px; border: 1px solid #ff4757;">
+                                <p style="color: #ffcc00; margin: 0; font-size: 0.9em;">
+                                    <i class="fas fa-lightbulb"></i> Совет: кликайте как можно быстрее!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- HUD ИГРОКА -->
                     <div class="hud">
                         <div class="hud-item">
-                            <div class="label">Инфекция:</div>
+                            <div class="label">Заражение организма:</div>
                             <div class="progress-bar">
                                 <div id="infectionBar" class="progress-fill"></div>
                             </div>
                         </div>
                         <div class="hud-item">
-                            <div class="label">Иммунитет:</div>
+                            <div class="label">Иммунный ответ:</div>
                             <div class="progress-bar">
                                 <div id="immunityBar" class="progress-fill immunity"></div>
                             </div>
                         </div>
-                        <button id="attackBtn" class="action-btn">
-                            <i class="fas fa-skull-crossbones"></i> Атаковать клетку
-                        </button>
+                        <!-- ЗДОРОВЬЕ ИГРОКА -->
+                        <div class="hud-item">
+                            <div class="label">Здоровье вируса:</div>
+                            <div class="health-display">
+                                <div class="health-bar-container">
+                                    <div id="healthBar" class="health-bar"></div>
+                                </div>
+                                <span id="healthValue" style="color: #6cff6c; font-weight: bold; min-width: 60px;">100/100</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button id="attackBtn" class="action-btn" style="flex: 1;">
+                                <i class="fas fa-skull-crossbones"></i> Выстрел (ПРОБЕЛ)
+                            </button>
+                            <button id="mutateBtn" class="action-btn" style="flex: 1; background: linear-gradient(135deg, #6cff6c, #4cd964);">
+                                <i class="fas fa-dna"></i> Мутации (M)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -56,8 +343,8 @@
                         
                         <div class="upgrade" id="upgrade-infectivity">
                             <div class="upgrade-info">
-                                <h4>Усилить шипы</h4>
-                                <p>+20% к заразности</p>
+                                <h4><i class="fas fa-biohazard"></i> Усилить шипы</h4>
+                                <p>+20% к заразности и урону</p>
                             </div>
                             <button class="buy-btn" data-cost="50" data-type="rna">
                                 <i class="fas fa-dna"></i> 50 РНК
@@ -66,8 +353,8 @@
 
                         <div class="upgrade" id="upgrade-replication">
                             <div class="upgrade-info">
-                                <h4>Улучшить репликацию</h4>
-                                <p>+1 АТФ/сек</p>
+                                <h4><i class="fas fa-clone"></i> Улучшить репликацию</h4>
+                                <p>+1 АТФ/сек, +2 частицы/сек</p>
                             </div>
                             <button class="buy-btn" data-cost="100" data-type="rna">
                                 <i class="fas fa-dna"></i> 100 РНК
@@ -76,53 +363,208 @@
 
                         <div class="upgrade" id="upgrade-stealth">
                             <div class="upgrade-info">
-                                <h4>Маскировка</h4>
-                                <p>-10% к обнаружению</p>
+                                <h4><i class="fas fa-user-secret"></i> Маскировка</h4>
+                                <p>-15% к обнаружению иммунитетом</p>
                             </div>
                             <button class="buy-btn" data-cost="75" data-type="atp">
                                 <i class="fas fa-bolt"></i> 75 АТФ
                             </button>
                         </div>
 
-                        <div class="upgrade" id="upgrade-divide">
+                        <div class="upgrade" id="upgrade-speed">
                             <div class="upgrade-info">
-                                <h4>Деление вируса</h4>
-                                <p>Создать 5 новых частиц</p>
+                                <h4><i class="fas fa-running"></i> Скорость движения</h4>
+                                <p>+30% к скорости передвижения</p>
                             </div>
-                            <button class="buy-btn" data-cost="30" data-type="particles">
-                                <i class="fas fa-viruses"></i> 30 Частиц
+                            <button class="buy-btn" data-cost="60" data-type="rna">
+                                <i class="fas fa-dna"></i> 60 РНК
+                            </button>
+                        </div>
+                        
+                        <div class="upgrade" id="upgrade-health">
+                            <div class="upgrade-info">
+                                <h4><i class="fas fa-shield-alt"></i> Укрепление оболочки</h4>
+                                <p>+50 к максимальному здоровью</p>
+                            </div>
+                            <button class="buy-btn" data-cost="80" data-type="atp">
+                                <i class="fas fa-bolt"></i> 80 АТФ
                             </button>
                         </div>
                     </div>
 
                     <div class="stats">
-                        <h3><i class="fas fa-chart-line"></i> Статистика</h3>
-                        <div class="stat-item">
-                            <span>Заразность:</span>
-                            <span id="stat-infectivity">1.0</span>
+                        <h3><i class="fas fa-chart-line"></i> Статистика вируса</h3>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="label">Заразность:</div>
+                                <div class="value" id="stat-infectivity">1.0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">Скорость:</div>
+                                <div class="value" id="stat-speed">2.0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">Репликация:</div>
+                                <div class="value" id="stat-replication">1/сек</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">Скрытность:</div>
+                                <div class="value" id="stat-stealth">100%</div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <span>Скорость репликации:</span>
-                            <span id="stat-replication">1</span>/сек
-                        </div>
-                        <div class="stat-item">
-                            <span>Обнаружение иммунитетом:</span>
-                            <span id="stat-stealth">100%</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>Зараженных клеток:</span>
-                            <span id="stat-infected">0</span>
+                        
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="stat-item">
+                                <span>Захвачено клеток:</span>
+                                <span id="stat-infected">0/20</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Уровень сложности:</span>
+                                <span class="difficulty-badge">
+                                    <i class="fas fa-skull"></i> <span id="stat-difficulty">1</span>
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Активных мутаций:</span>
+                                <span id="stat-mutations">0</span>
+                            </div>
                         </div>
                     </div>
+                    
+                    <!-- БЛОК УПРАВЛЕНИЯ -->
+                    <div class="controls-info">
+                        <h4><i class="fas fa-gamepad"></i> Управление</h4>
+                        <div class="control-item">
+                            <span>Движение:</span>
+                            <span>
+                                <span class="key">W</span>
+                                <span class="key">A</span>
+                                <span class="key">S</span>
+                                <span class="key">D</span>
+                            </span>
+                        </div>
+                        <div class="control-item">
+                            <span>Выстрел вирусом:</span>
+                            <span class="key">ПРОБЕЛ</span>
+                        </div>
+                        <div class="control-item">
+                            <span>Открыть мутации:</span>
+                            <span class="key">M</span>
+                        </div>
+                        <div class="control-item">
+                            <span>Захват клетки:</span>
+                            <span>Клик мышкой</span>
+                        </div>
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.85em; color: #a0a0ff;">
+                            <i class="fas fa-info-circle"></i> Столкнитесь с клеткой, чтобы начать захват
+                        </div>
+                    </div>
+                    
+                    <!-- КНОПКА ЭВОЛЮЦИИ -->
+                    <button id="evolveBtn" class="action-btn" style="margin-top: 15px; background: linear-gradient(135deg, #9d4edd, #7b2cbf);">
+                        <i class="fas fa-arrow-up"></i> ЭВОЛЮЦИЯ ВИРУСА
+                    </button>
                 </div>
             </div>
         </main>
 
+        <!-- МЕНЮ МУТАЦИЙ (скрытое) -->
+        <div id="mutationMenu" class="mutation-menu">
+            <button class="close-menu" id="closeMutationMenu">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="mutation-header">
+                <i class="fas fa-dna"></i> Лаборатория мутаций
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px; padding: 10px; background: rgba(108, 255, 108, 0.1); border-radius: 10px;">
+                <p style="color: #6cff6c; margin: 0;">
+                    <i class="fas fa-vial"></i> Доступно очков мутации: 
+                    <strong id="availableMutations">0</strong>
+                </p>
+            </div>
+            
+            <div class="mutation-list" id="mutationList">
+                <!-- Мутации будут добавлены динамически через JavaScript -->
+                <div style="text-align: center; padding: 20px; color: #a0a0ff;">
+                    <i class="fas fa-spinner fa-spin"></i> Загрузка доступных мутаций...
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 71, 87, 0.1); border-radius: 10px;">
+                <h4 style="color: #ffcc00; margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> Как работают мутации?</h4>
+                <p style="color: #a0a0ff; font-size: 0.9em; margin: 0;">
+                    Мутации — постоянные улучшения вашего вируса. Каждая мутация требует очков мутации, которые вы получаете за захват клеток. Мутации остаются с вами даже после поражения!
+                </p>
+            </div>
+        </div>
+
         <footer>
-            <p>Viral Manager 2D MVP | Управляйте вирусом, эволюционируйте, заражайте!</p>
+            <p>
+                <i class="fas fa-virus"></i> Viral Manager 2D | 
+                Управляйте вирусом (WASD), захватывайте клетки, мутируйте и эволюционируйте! |
+                Сложность увеличивается автоматически
+            </p>
         </footer>
     </div>
 
     <script src="game.js"></script>
+    
+    <script>
+        // Дополнительный скрипт для управления интерфейсом
+        document.addEventListener('DOMContentLoaded', function() {
+            // Закрытие меню мутаций
+            document.getElementById('closeMutationMenu').addEventListener('click', function() {
+                document.getElementById('mutationMenu').style.display = 'none';
+            });
+            
+            // Открытие меню мутаций по кнопке M
+            document.addEventListener('keydown', function(e) {
+                if (e.key.toLowerCase() === 'm') {
+                    const menu = document.getElementById('mutationMenu');
+                    if (menu.style.display === 'block') {
+                        menu.style.display = 'none';
+                    } else {
+                        menu.style.display = 'block';
+                        // Здесь будет вызов функции обновления меню мутаций из game.js
+                        if (window.game && window.game.openMutationMenu) {
+                            window.game.openMutationMenu();
+                        }
+                    }
+                }
+                
+                // Пробел для атаки
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    document.getElementById('attackBtn').click();
+                }
+            });
+            
+            // Кнопка эволюции
+            document.getElementById('evolveBtn').addEventListener('click', function() {
+                alert('Эволюция вируса откроется в следующем обновлении! Сейчас используйте мутации.');
+            });
+            
+            // Клик по оверлею захвата (не закрывает его)
+            document.getElementById('captureOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    // Можно добавить логику отмены захвата
+                }
+            });
+            
+            // Закрытие меню мутаций по клику вне его
+            document.getElementById('mutationMenu').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+        
+        // Создаем глобальную ссылку на игру для доступа из HTML
+        window.addEventListener('load', function() {
+            window.game = new Game();
+        });
+    </script>
 </body>
 </html>
