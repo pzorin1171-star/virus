@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral Manager 2D</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-virus"></i> Viral Manager 2D</h1>
+            <div class="resources">
+                <div class="resource">
+                    <i class="fas fa-dna"></i>
+                    <span id="rna">100</span> РНК
+                </div>
+                <div class="resource">
+                    <i class="fas fa-bolt"></i>
+                    <span id="atp">50</span> АТФ
+                </div>
+                <div class="resource">
+                    <i class="fas fa-viruses"></i>
+                    <span id="particles">10</span> Частиц
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="game-area">
+                <div class="canvas-container">
+                    <canvas id="gameCanvas" width="800" height="500"></canvas>
+                    <div class="hud">
+                        <div class="hud-item">
+                            <div class="label">Инфекция:</div>
+                            <div class="progress-bar">
+                                <div id="infectionBar" class="progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="hud-item">
+                            <div class="label">Иммунитет:</div>
+                            <div class="progress-bar">
+                                <div id="immunityBar" class="progress-fill immunity"></div>
+                            </div>
+                        </div>
+                        <button id="attackBtn" class="action-btn">
+                            <i class="fas fa-skull-crossbones"></i> Атаковать клетку
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="upgrades">
+                        <h3><i class="fas fa-syringe"></i> Эволюция вируса</h3>
+                        
+                        <div class="upgrade" id="upgrade-infectivity">
+                            <div class="upgrade-info">
+                                <h4>Усилить шипы</h4>
+                                <p>+20% к заразности</p>
+                            </div>
+                            <button class="buy-btn" data-cost="50" data-type="rna">
+                                <i class="fas fa-dna"></i> 50 РНК
+                            </button>
+                        </div>
+
+                        <div class="upgrade" id="upgrade-replication">
+                            <div class="upgrade-info">
+                                <h4>Улучшить репликацию</h4>
+                                <p>+1 АТФ/сек</p>
+                            </div>
+                            <button class="buy-btn" data-cost="100" data-type="rna">
+                                <i class="fas fa-dna"></i> 100 РНК
+                            </button>
+                        </div>
+
+                        <div class="upgrade" id="upgrade-stealth">
+                            <div class="upgrade-info">
+                                <h4>Маскировка</h4>
+                                <p>-10% к обнаружению</p>
+                            </div>
+                            <button class="buy-btn" data-cost="75" data-type="atp">
+                                <i class="fas fa-bolt"></i> 75 АТФ
+                            </button>
+                        </div>
+
+                        <div class="upgrade" id="upgrade-divide">
+                            <div class="upgrade-info">
+                                <h4>Деление вируса</h4>
+                                <p>Создать 5 новых частиц</p>
+                            </div>
+                            <button class="buy-btn" data-cost="30" data-type="particles">
+                                <i class="fas fa-viruses"></i> 30 Частиц
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stats">
+                        <h3><i class="fas fa-chart-line"></i> Статистика</h3>
+                        <div class="stat-item">
+                            <span>Заразность:</span>
+                            <span id="stat-infectivity">1.0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Скорость репликации:</span>
+                            <span id="stat-replication">1</span>/сек
+                        </div>
+                        <div class="stat-item">
+                            <span>Обнаружение иммунитетом:</span>
+                            <span id="stat-stealth">100%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Зараженных клеток:</span>
+                            <span id="stat-infected">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Viral Manager 2D MVP | Управляйте вирусом, эволюционируйте, заражайте!</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
